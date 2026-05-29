@@ -1,9 +1,22 @@
 const jobRepository = require('../repositories/job.repository');
+const parserService = require('../services/parser.service');
 
 // Handles the HTTP request to create a new job description
 async function createJob(req, res, next) {
   try {
-    const { title, content } = req.body;
+    let title = req.body.title;
+    let content = req.body.content;
+    if (req.file) {
+      const extractedText = await parserService.extractText(
+        req.file.buffer,
+        req.file.mimetype,
+        req.file.originalname
+      );
+      content = extractedText;
+      if (!title || !title.trim()) {
+        title = req.file.originalname.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ').trim();
+      }
+    }
     if (!title || !title.trim()) {
       return res.status(400).json({ error: 'Job title is required.' });
     }
@@ -16,6 +29,16 @@ async function createJob(req, res, next) {
     });
     return res.status(201).json(newJob);
   } catch (error) {
+    if (
+      error.message.includes('format') ||
+      error.message.includes('supported') ||
+      error.message.includes('readable') ||
+      error.message.includes('limit') ||
+      error.message.includes('empty') ||
+      error.message.includes('structure')
+    ) {
+      error.status = 400;
+    }
     next(error);
   }
 }
