@@ -33,9 +33,10 @@ app.get('/api/health', async (req, res, next) => {
 app.use((err, req, res, next) => {
   console.error('Unhandled Server Error:', err);
   const status = err.status || 500;
+  const isClientError = status >= 400 && status < 500;
   return res.status(status).json({
     error: {
-      message: err.message || 'An unexpected internal server error occurred.',
+      message: isClientError ? err.message : 'An unexpected internal server error occurred.',
       status,
       timestamp: new Date().toISOString(),
     },
