@@ -1,95 +1,65 @@
 import { useState, useEffect } from 'react';
+import JobDescriptionPanel from './components/JobDescriptionPanel';
 
-// Main application component containing the primary interface shell
+// Main application shell managing the workflow routing and global state
 function App() {
+  const [selectedJobId, setSelectedJobId] = useState(null);
   const [healthStatus, setHealthStatus] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/health`)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Server returned status: ${res.status}`);
+        if (res.ok) {
+          return res.json();
         }
-        return res.json();
+        throw new Error('Health check offline.');
       })
-      .then((data) => {
-        setHealthStatus(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .then((data) => setHealthStatus(data))
+      .catch(() => setHealthStatus(null));
   }, []);
 
   return (
-    <div style={{
-      fontFamily: 'system-ui, sans-serif',
-      background: '#0f172a',
-      color: '#f1f5f9',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      margin: 0,
-      padding: '20px'
-    }}>
-      <div style={{
-        background: '#1e293b',
-        border: '1px solid #334155',
-        borderRadius: '12px',
-        padding: '30px',
-        maxWidth: '500px',
-        width: '100%',
-        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
-      }}>
-        <h1 style={{ margin: '0 0 20px 0', fontSize: '24px', borderBottom: '1px solid #334155', paddingBottom: '10px' }}>
-          Resume Screening Application
-        </h1>
-        <p style={{ margin: '0 0 10px 0', color: '#94a3b8' }}>Foundation Phase Health Check</p>
-        
-        {loading && <p style={{ color: '#38bdf8' }}>Connecting to backend...</p>}
-        
-        {error && (
-          <div style={{ background: '#451a03', border: '1px solid #78350f', padding: '12px', borderRadius: '6px', color: '#fdba74' }}>
-            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>Backend Connection Failed</p>
-            <p style={{ margin: 0, fontSize: '14px' }}>{error}</p>
-          </div>
-        )}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            Resume Screener & Candidate Ranker
+          </h1>
+          <p className="text-xs text-slate-400">Automated candidate matching and ranking</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500">Service Status:</span>
+          <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${
+            healthStatus ? 'bg-emerald-950/60 border border-emerald-500 text-emerald-400' : 'bg-red-950/60 border border-red-500 text-red-400'
+          }`}>
+            {healthStatus ? 'Online' : 'Offline'}
+          </span>
+        </div>
+      </header>
 
-        {healthStatus && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '15px 0' }}>
-              <span>Server Status:</span>
-              <span style={{
-                background: healthStatus.services.server === 'OK' ? '#064e3b' : '#7f1d1d',
-                color: healthStatus.services.server === 'OK' ? '#34d399' : '#f87171',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: 'bold'
-              }}>{healthStatus.services.server}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '15px 0' }}>
-              <span>MySQL Database:</span>
-              <span style={{
-                background: healthStatus.services.database === 'OK' ? '#064e3b' : '#7f1d1d',
-                color: healthStatus.services.database === 'OK' ? '#34d399' : '#f87171',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: 'bold'
-              }}>{healthStatus.services.database}</span>
-            </div>
-            <p style={{ margin: '20px 0 0 0', fontSize: '12px', color: '#64748b', textAlign: 'right' }}>
-              Checked: {new Date(healthStatus.timestamp).toLocaleTimeString()}
+      <main className="flex-1 max-w-7xl w-full mx-auto py-6 space-y-6">
+        <JobDescriptionPanel
+          onSelectJob={setSelectedJobId}
+          selectedJobId={selectedJobId}
+        />
+
+        {selectedJobId ? (
+          <div className="mx-6 p-6 bg-slate-800/30 border border-dashed border-slate-700 rounded-xl text-center">
+            <h3 className="text-lg font-bold text-white mb-2">Job Description Selected</h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
+              Ready for Phase 2. The resume upload and screening engine features will be connected in the next phase.
             </p>
           </div>
+        ) : (
+          <div className="mx-6 p-6 bg-slate-800/10 border border-dashed border-slate-800 rounded-xl text-center text-slate-500 text-sm">
+            Please create or select a Job Description to proceed to candidate screening.
+          </div>
         )}
-      </div>
+      </main>
+
+      <footer className="border-t border-slate-900 py-4 px-6 text-center text-xs text-slate-600">
+        Resume Screening & Candidate Ranking Application. All rights reserved.
+      </footer>
     </div>
   );
 }
