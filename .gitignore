@@ -37,3 +37,5 @@ out/
 .cache
 .vite
 .eslintcache
+system_design.md
+assignment_requirements.txt
