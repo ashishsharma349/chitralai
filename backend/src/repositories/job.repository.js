@@ -17,8 +17,14 @@ async function findAll() {
   });
 }
 
+// Counts the total number of job descriptions
+async function count() {
+  return await JobDescription.count();
+}
+
 module.exports = {
   create,
   findById,
   findAll,
+  count,
 };
