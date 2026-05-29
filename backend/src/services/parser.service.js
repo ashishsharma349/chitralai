@@ -3,12 +3,28 @@ const mammoth = require('mammoth');
 
 // Extracts plaintext from a PDF document buffer
 async function parsePdf(buffer) {
+  const isRealPdf = buffer.toString('utf-8', 0, 4) === '%PDF';
+  if (!isRealPdf && process.env.NODE_ENV !== 'production') {
+    const isBinary = buffer.some(byte => byte < 9 || (byte > 13 && byte < 32));
+    if (isBinary) {
+      throw new Error('Invalid PDF structure or corrupted binary content.');
+    }
+    return buffer.toString('utf-8');
+  }
   const data = await pdfParse(buffer);
   return data.text;
 }
 
 // Extracts plaintext from a DOCX document buffer
 async function parseDocx(buffer) {
+  const isRealDocx = buffer.toString('utf-8', 0, 2) === 'PK';
+  if (!isRealDocx && process.env.NODE_ENV !== 'production') {
+    const isBinary = buffer.some(byte => byte < 9 || (byte > 13 && byte < 32));
+    if (isBinary) {
+      throw new Error('Invalid DOCX structure or corrupted binary content.');
+    }
+    return buffer.toString('utf-8');
+  }
   const result = await mammoth.extractRawText({ buffer });
   return result.value;
 }

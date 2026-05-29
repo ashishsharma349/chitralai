@@ -21,7 +21,7 @@ mock-resumes/
 *.docx.test
 *.pdf.test
 temp-uploads/
-tests/tmp/
+tests/
 .vscode/
 .idea/
 *.suo
