@@ -4,6 +4,11 @@ const parserService = require('../services/parser.service');
 // Handles the HTTP request to create a new job description
 async function createJob(req, res, next) {
   try {
+    const currentCount = await jobRepository.count();
+    if (currentCount >= 5) {
+      return res.status(400).json({ error: 'Free tier limit reached. You can create a maximum of 5 Job Descriptions.' });
+    }
+
     let title = req.body.title;
     let content = req.body.content;
     if (req.file) {
