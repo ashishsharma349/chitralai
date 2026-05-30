@@ -1,7 +1,16 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 // Renders a modal displaying full candidate match analysis and scoring breakdown
 function CandidateModal({ isOpen, onClose, candidate }) {
+  const [activeTab, setActiveTab] = useState('analysis');
+
+  useEffect(() => {
+    // Reset tab to analysis when candidate changes
+    if (isOpen) {
+      setActiveTab('analysis');
+    }
+  }, [isOpen, candidate]);
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
@@ -42,7 +51,12 @@ function CandidateModal({ isOpen, onClose, candidate }) {
                 <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                {candInfo.email}
+                <a 
+                  href={`mailto:${candInfo.email}`} 
+                  className="hover:text-amber-700 hover:underline transition-all"
+                >
+                  {candInfo.email}
+                </a>
               </span>
               {candInfo.phone && (
                 <span className="flex items-center gap-1.5">
@@ -89,67 +103,107 @@ function CandidateModal({ isOpen, onClose, candidate }) {
           </div>
         </header>
 
+        {/* Tab Selection */}
+        <div className="flex border-b border-stone-200 bg-stone-50/50 px-6">
+          <button
+            onClick={() => setActiveTab('analysis')}
+            className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+              activeTab === 'analysis'
+                ? 'border-amber-600 text-amber-800'
+                : 'border-transparent text-stone-500 hover:text-stone-700'
+            }`}
+          >
+            AI Evaluation
+          </button>
+          <button
+            onClick={() => setActiveTab('preview')}
+            className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+              activeTab === 'preview'
+                ? 'border-amber-600 text-amber-800'
+                : 'border-transparent text-stone-500 hover:text-stone-700'
+            }`}
+          >
+            Resume Preview
+          </button>
+        </div>
+
         <div className="p-6 space-y-6 overflow-y-auto flex-1">
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-stone-50 border border-stone-200 p-4 rounded-xl">
-              <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                Matched Skills ({skillsMatch.length})
-              </h3>
-              {skillsMatch.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {skillsMatch.map((skill, idx) => (
-                    <span 
-                      key={idx} 
-                      className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-md text-xs font-semibold capitalize"
-                    >
-                      {skill.toLowerCase()}
-                    </span>
-                  ))}
+          {activeTab === 'analysis' ? (
+            <>
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-stone-50 border border-stone-200 p-4 rounded-xl">
+                  <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    Matched Skills ({skillsMatch.length})
+                  </h3>
+                  {skillsMatch.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {skillsMatch.map((skill, idx) => (
+                        <span 
+                          key={idx} 
+                          className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-md text-xs font-semibold capitalize"
+                        >
+                          {skill.toLowerCase()}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-stone-500 italic">No matching tech skills detected.</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-xs text-stone-500 italic">No matching tech skills detected.</p>
-              )}
-            </div>
 
-            <div className="bg-stone-50 border border-stone-200 p-4 rounded-xl">
-              <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                Missing Skills ({skillsMissing.length})
-              </h3>
-              {skillsMissing.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {skillsMissing.map((skill, idx) => (
-                    <span 
-                      key={idx} 
-                      className="bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-md text-xs font-semibold capitalize"
-                    >
-                      {skill.toLowerCase()}
-                    </span>
-                  ))}
+                <div className="bg-stone-50 border border-stone-200 p-4 rounded-xl">
+                  <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                    Missing Skills ({skillsMissing.length})
+                  </h3>
+                  {skillsMissing.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {skillsMissing.map((skill, idx) => (
+                        <span 
+                          key={idx} 
+                          className="bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-md text-xs font-semibold capitalize"
+                        >
+                          {skill.toLowerCase()}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-stone-500 italic">No missing critical skills identified.</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-xs text-stone-500 italic">No missing critical skills identified.</p>
-              )}
-            </div>
-          </section>
+              </section>
 
-          <section className="space-y-4">
-            <div className="border-b border-stone-100 pb-3">
-              <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Experience Relevance</h4>
-              <p className="text-stone-700 text-sm leading-relaxed">{experienceRelevance}</p>
-            </div>
+              <section className="space-y-4">
+                <div className="border-b border-stone-100 pb-3">
+                  <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Experience Relevance</h4>
+                  <p className="text-stone-700 text-sm leading-relaxed">{experienceRelevance}</p>
+                </div>
 
-            <div className="border-b border-stone-100 pb-3">
-              <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Education & Background Alignment</h4>
-              <p className="text-stone-700 text-sm leading-relaxed">{educationAlignment}</p>
-            </div>
+                <div className="border-b border-stone-100 pb-3">
+                  <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Education & Background Alignment</h4>
+                  <p className="text-stone-700 text-sm leading-relaxed">{educationAlignment}</p>
+                </div>
 
-            <div className="bg-amber-50/40 border border-amber-200/60 p-5 rounded-2xl">
-              <h4 className="text-xs font-extrabold text-amber-900 uppercase tracking-widest mb-2">Evaluation Rationale</h4>
-              <p className="text-stone-800 text-sm leading-relaxed italic">"{rationale}"</p>
+                <div className="bg-amber-50/40 border border-amber-200/60 p-5 rounded-2xl">
+                  <h4 className="text-xs font-extrabold text-amber-900 uppercase tracking-widest mb-2">Evaluation Rationale</h4>
+                  <p className="text-stone-800 text-sm leading-relaxed italic">"{rationale}"</p>
+                </div>
+              </section>
+            </>
+          ) : (
+            <div className="bg-stone-50 border border-stone-200 p-5 rounded-2xl h-full flex flex-col">
+              <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Document Content Preview
+              </h3>
+              <div className="flex-1 bg-white border border-stone-200 rounded-xl p-4 overflow-y-auto max-h-[45vh] shadow-inner text-stone-800 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                {resumeInfo.extractedText || 'No resume content available for preview.'}
+              </div>
             </div>
-          </section>
+          )}
         </div>
 
         <footer className="bg-stone-50 border-t border-stone-200 p-4 flex justify-end gap-3">
