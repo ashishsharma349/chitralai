@@ -48,7 +48,7 @@ async function startServer() {
   try {
     await connectDB();
     if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
+      await sequelize.sync();
       console.log('Database schemas verified.');
     }
     app.listen(PORT, () => {
