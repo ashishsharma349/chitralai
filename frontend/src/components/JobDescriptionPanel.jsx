@@ -77,6 +77,18 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId, onJobCreated, hideLis
         setError('Please provide both a title and description.');
         return;
       }
+      if (title.trim().length < 3) {
+        setError('Job title must be at least 3 characters long.');
+        return;
+      }
+      if (title.trim().length > 150) {
+        setError('Job title must not exceed 150 characters.');
+        return;
+      }
+      if (content.trim().length < 50) {
+        setError('Job description must be at least 50 characters. Please provide a more detailed description.');
+        return;
+      }
       setLoading(true);
       fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/jobs`, {
         method: 'POST',
@@ -200,6 +212,17 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId, onJobCreated, hideLis
                 className="w-full bg-stone-50 border border-stone-300 rounded-lg px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium"
                 placeholder="e.g. Senior Backend Architect"
               />
+              <div className="flex justify-between mt-1.5">
+                <span className={`text-[11px] font-medium ${
+                  title.trim().length > 0 && title.trim().length < 3 ? 'text-red-500' : title.trim().length > 150 ? 'text-red-500' : 'text-stone-400'
+                }`}>
+                  {title.trim().length > 0 && title.trim().length < 3 && 'Min 3 characters'}
+                  {title.trim().length > 150 && 'Exceeds 150 character limit'}
+                </span>
+                <span className={`text-[11px] font-medium ${title.trim().length > 150 ? 'text-red-500' : 'text-stone-400'}`}>
+                  {title.trim().length}/150
+                </span>
+              </div>
             </div>
 
             {activeTab === 'manual' ? (
@@ -214,6 +237,21 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId, onJobCreated, hideLis
                   className="w-full bg-stone-50 border border-stone-300 rounded-lg px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium"
                   placeholder="Paste detailed job requirements, responsibilities, and key technologies..."
                 />
+                <div className="flex justify-between mt-1.5">
+                  <span className={`text-[11px] font-medium ${
+                    content.trim().length > 0 && content.trim().length < 50 ? 'text-amber-600' : 'text-stone-400'
+                  }`}>
+                    {content.trim().length > 0 && content.trim().length < 50 
+                      ? `${50 - content.trim().length} more characters needed`
+                      : content.trim().length >= 50 ? '✓ Sufficient detail' : 'Min 50 characters for accurate matching'
+                    }
+                  </span>
+                  <span className={`text-[11px] font-medium ${
+                    content.trim().length > 0 && content.trim().length < 50 ? 'text-amber-600' : 'text-stone-400'
+                  }`}>
+                    {content.trim().length}
+                  </span>
+                </div>
               </div>
             ) : (
               <div>
