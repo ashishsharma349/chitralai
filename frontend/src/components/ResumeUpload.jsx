@@ -65,7 +65,7 @@ function ResumeUpload({ jobId, onUploadComplete }) {
       .then((res) => {
         if (!res.ok) {
           return res.json().then((data) => {
-            throw new Error(data.error || 'Upload failed.');
+            throw new Error(data.error?.message || data.error || 'Upload failed.');
           });
         }
         return res.json();

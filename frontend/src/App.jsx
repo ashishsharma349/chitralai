@@ -7,8 +7,14 @@ import ResultsDashboard from './components/ResultsDashboard';
 function App() {
   const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState(null);
-  const [healthStatus, setHealthStatus] = useState(null);
   const [loadingJobs, setLoadingJobs] = useState(false);
+  const [resultsCache, setResultsCache] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleCacheUpdate = (jobId, data) => {
+    setResultsCache((prev) => ({ ...prev, [jobId]: data }));
+  };
 
   const fetchJobs = () => {
     setLoadingJobs(true);
@@ -33,23 +39,39 @@ function App() {
   };
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    fetch(`${apiUrl}/api/health`)
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        throw new Error('Health check offline.');
-      })
-      .then((data) => setHealthStatus(data))
-      .catch(() => setHealthStatus(null));
-
     fetchJobs();
   }, []);
 
   const handleJobCreated = (newJob) => {
     setJobs((prevJobs) => [newJob, ...prevJobs]);
     setSelectedJobId(newJob.id);
+  };
+
+  const handleDeleteJob = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${apiUrl}/api/jobs/${deleteTarget.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error?.message || data.error || 'Failed to delete job description.');
+      }
+      setJobs((prev) => prev.filter((j) => j.id !== deleteTarget.id));
+      setResultsCache((prev) => {
+        const newCache = { ...prev };
+        delete newCache[deleteTarget.id];
+        return newCache;
+      });
+      if (selectedJobId === deleteTarget.id) {
+        setSelectedJobId(null);
+      }
+    } catch (err) {
+      console.error('Delete failed:', err.message);
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
   };
 
   const handleProUpgrade = () => {
@@ -101,16 +123,36 @@ function App() {
                   <div
                     key={job.id}
                     onClick={() => setSelectedJobId(job.id)}
-                    className={`px-6 py-3.5 cursor-pointer transition-all border-l-4 ${
+                    className={`px-6 py-3.5 cursor-pointer transition-all border-l-4 flex items-start justify-between gap-2 ${
                       selectedJobId === job.id
-                        ? 'bg-amber-50/40 border-amber-600 text-amber-900 font-semibold shadow-inner'
+                        ? 'bg-amber-50/45 border-amber-600 text-amber-900 font-semibold'
                         : 'border-transparent text-stone-600 hover:text-stone-900 hover:bg-stone-50/50'
                     }`}
                   >
-                    <h3 className="text-sm truncate capitalize">{job.title}</h3>
-                    <span className="text-[10px] text-stone-400 mt-1 block">
-                      {new Date(job.created_at || job.createdAt).toLocaleDateString()}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`text-sm truncate capitalize flex items-center gap-1.5 ${selectedJobId === job.id ? 'font-bold text-stone-900' : 'text-stone-700'}`}>
+                        {selectedJobId === job.id && <span className="w-1.5 h-1.5 rounded-full bg-amber-650 inline-block flex-shrink-0"></span>}
+                        {job.title}
+                      </h3>
+                      <span className="text-[11px] text-stone-500 block mt-0.5 font-medium">
+                        {job.candidateCount || 0} candidate{job.candidateCount !== 1 ? 's' : ''}
+                      </span>
+                      <span className="text-[10px] text-stone-400 mt-0.5 block">
+                        {new Date(job.created_at || job.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget(job);
+                      }}
+                      className="mt-0.5 p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                      title={`Delete ${job.title}`}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -128,16 +170,6 @@ function App() {
             </svg>
             Upgrade to Pro
           </button>
-          <div className="flex items-center justify-between text-[10px] text-stone-500 px-1 mt-1">
-            <span>Server status:</span>
-            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-              healthStatus 
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}>
-              {healthStatus ? 'Online' : 'Offline'}
-            </span>
-          </div>
         </div>
       </aside>
 
@@ -147,10 +179,10 @@ function App() {
             <h2 className="text-lg font-extrabold text-stone-900 capitalize">
               {selectedJobId === null ? 'Create Job Position' : selectedJob?.title}
             </h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5 font-medium">
               {selectedJobId === null 
                 ? 'Add role parameters to match candidates' 
-                : `Active screening Workspace • Added: ${new Date(selectedJob?.created_at || selectedJob?.createdAt).toLocaleDateString()}`
+                : `Screening ${selectedJob?.candidateCount || 0} candidate${selectedJob?.candidateCount !== 1 ? 's' : ''} • Ranked by AI Match Score`
               }
             </p>
           </div>
@@ -177,14 +209,62 @@ function App() {
               <ResumeUpload
                 jobId={selectedJobId}
                 onUploadComplete={() => {
+                  setResultsCache((prev) => {
+                    const newCache = { ...prev };
+                    delete newCache[selectedJobId];
+                    return newCache;
+                  });
+                  fetchJobs();
                   window.dispatchEvent(new CustomEvent('resume-uploaded'));
                 }}
               />
-              <ResultsDashboard jobId={selectedJobId} />
+              <ResultsDashboard 
+                jobId={selectedJobId} 
+                resultsCache={resultsCache}
+                onCacheUpdate={handleCacheUpdate}
+              />
             </div>
           )}
         </div>
       </main>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => !deleting && setDeleteTarget(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-stone-900">Delete Job Description</h3>
+                <p className="text-xs text-stone-500 mt-0.5">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-sm text-stone-600">
+              Are you sure you want to delete <strong className="text-stone-900">{deleteTarget.title}</strong>? All {deleteTarget.candidateCount || 0} associated screening results will also be permanently removed.
+            </p>
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteJob}
+                disabled={deleting}
+                className="flex-1 py-2.5 px-4 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleting && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
