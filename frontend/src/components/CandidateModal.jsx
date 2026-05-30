@@ -55,26 +55,37 @@ function CandidateModal({ isOpen, onClose, candidate }) {
             </div>
             <p className="text-xs text-stone-500 mt-2 font-mono truncate max-w-[400px]">File: {resumeInfo.fileName}</p>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="relative flex items-center justify-center">
-              <svg className="w-16 h-16 transform -rotate-90">
-                <circle cx="32" cy="32" r="28" className="text-stone-200" strokeWidth="6" fill="transparent" stroke="currentColor" />
-                <circle 
-                  cx="32" 
-                  cy="32" 
-                  r="28" 
-                  className="text-amber-600" 
-                  strokeWidth="6" 
-                  fill="transparent" 
-                  strokeDasharray={176} 
-                  strokeDashoffset={176 - (176 * score) / 100} 
-                  strokeLinecap="round" 
-                  stroke="currentColor" 
-                />
-              </svg>
-              <span className="absolute text-lg font-extrabold text-stone-900">{score}</span>
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="relative flex items-center justify-center">
+                <svg className="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="28" className="text-stone-200" strokeWidth="6" fill="transparent" stroke="currentColor" />
+                  <circle 
+                    cx="32" 
+                    cy="32" 
+                    r="28" 
+                    className="text-amber-600" 
+                    strokeWidth="6" 
+                    fill="transparent" 
+                    strokeDasharray={176} 
+                    strokeDashoffset={176 - (176 * score) / 100} 
+                    strokeLinecap="round" 
+                    stroke="currentColor" 
+                  />
+                </svg>
+                <span className="absolute text-lg font-extrabold text-stone-900">{score}</span>
+              </div>
+              <span className="text-[10px] font-bold text-amber-800 uppercase tracking-widest mt-1">Match Score</span>
             </div>
-            <span className="text-[10px] font-bold text-amber-800 uppercase tracking-widest mt-1">Match Score</span>
+            <button
+              onClick={onClose}
+              className="text-stone-400 hover:text-stone-600 hover:bg-stone-200/50 transition-all p-1.5 rounded-lg -mt-1"
+              aria-label="Close dialog"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </header>
 
@@ -136,7 +147,7 @@ function CandidateModal({ isOpen, onClose, candidate }) {
 
             <div className="bg-amber-50/40 border border-amber-200/60 p-5 rounded-2xl">
               <h4 className="text-xs font-extrabold text-amber-900 uppercase tracking-widest mb-2">Evaluation Rationale</h4>
-              <p className="text-stone-850 text-sm leading-relaxed italic">"{rationale}"</p>
+              <p className="text-stone-800 text-sm leading-relaxed italic">"{rationale}"</p>
             </div>
           </section>
         </div>
@@ -144,7 +155,7 @@ function CandidateModal({ isOpen, onClose, candidate }) {
         <footer className="bg-stone-50 border-t border-stone-200 p-4 flex justify-end gap-3">
           <button 
             onClick={onClose}
-            className="px-5 py-2.5 bg-stone-850 hover:bg-stone-900 text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+            className="px-5 py-2.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
           >
             Close Analysis
           </button>
