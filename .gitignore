@@ -19,6 +19,7 @@ test-files/
 test-uploads/
 mock_resumes/
 mock-resumes/
+Resumes/
 *.docx.test
 *.pdf.test
 temp-uploads/
