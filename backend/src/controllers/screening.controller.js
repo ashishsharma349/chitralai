@@ -107,11 +107,12 @@ async function uploadAndParseResumes(req, res, next) {
 // Retrieves evaluation results for a specific job ID
 async function getScreeningResults(req, res, next) {
   try {
-    const jobId = parseInt(req.params.jobId, 10);
-    if (isNaN(jobId) || jobId <= 0) {
+    const jobIdStr = req.params.jobId;
+    if (!/^\d+$/.test(jobIdStr) || parseInt(jobIdStr, 10) === 0) {
       return res.status(400).json({ error: 'Invalid job identifier.' });
     }
-    const search = req.query.search || '';
+    const jobId = parseInt(jobIdStr, 10);
+    const search = (req.query.search || '').trim();
     const results = await screeningRepository.findByJobId(jobId, { search });
     
     const formatted = results.rows.map(row => ({

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // Renders the panel for entering, listing, and selecting Job Descriptions
-function JobDescriptionPanel({ onSelectJob, selectedJobId }) {
+function JobDescriptionPanel({ onSelectJob, selectedJobId, onJobCreated, hideList }) {
   const [jobs, setJobs] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -103,6 +103,9 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId }) {
           setSuccess(true);
           onSelectJob(newJob.id);
           setLoading(false);
+          if (onJobCreated) {
+            onJobCreated(newJob);
+          }
         })
         .catch((err) => {
           setError(err.message);
@@ -139,6 +142,9 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId }) {
           setSuccess(true);
           onSelectJob(newJob.id);
           setLoading(false);
+          if (onJobCreated) {
+            onJobCreated(newJob);
+          }
         })
         .catch((err) => {
           setError(err.message);
@@ -148,8 +154,8 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6">
-      <div className="md:col-span-2 bg-white border border-stone-200 p-6 rounded-xl shadow-md flex flex-col justify-between">
+    <div className={hideList ? "max-w-3xl mx-auto w-full px-6" : "grid grid-cols-1 md:grid-cols-3 gap-8 px-6"}>
+      <div className={hideList ? "bg-white border border-stone-200 p-6 rounded-xl shadow-md flex flex-col justify-between" : "md:col-span-2 bg-white border border-stone-200 p-6 rounded-xl shadow-md flex flex-col justify-between"}>
         <div>
           <div className="flex border-b border-stone-200 mb-6">
             <button
@@ -287,36 +293,37 @@ function JobDescriptionPanel({ onSelectJob, selectedJobId }) {
           </form>
         </div>
       </div>
-
-      <div className="bg-white border border-stone-200 p-6 rounded-xl shadow-md flex flex-col max-h-[500px]">
-        <h2 className="text-lg font-bold text-stone-900 mb-4 border-b border-stone-100 pb-2">Select Active Job</h2>
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-          {jobs.length === 0 ? (
-            <p className="text-stone-400 text-sm">No job descriptions found. Create or upload one to get started.</p>
-          ) : (
-            jobs.map((job) => (
-              <div
-                key={job.id}
-                onClick={() => {
-                  setError(null);
-                  setSuccess(false);
-                  onSelectJob(job.id);
-                }}
-                className={`p-4 rounded-lg cursor-pointer transition border duration-150 ${
-                  selectedJobId === job.id
-                    ? 'bg-amber-50/50 border-amber-500 text-amber-900 shadow-sm font-semibold'
-                    : 'bg-stone-50 border-stone-200 hover:border-stone-300 text-stone-700'
-                }`}
-              >
-                <h3 className="text-base mb-1 truncate">{job.title}</h3>
-                <p className="text-xs text-stone-500">
-                  Added: {new Date(job.created_at || job.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            ))
-          )}
+      {!hideList && (
+        <div className="bg-white border border-stone-200 p-6 rounded-xl shadow-md flex flex-col max-h-[500px]">
+          <h2 className="text-lg font-bold text-stone-900 mb-4 border-b border-stone-100 pb-2">Select Active Job</h2>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {jobs.length === 0 ? (
+              <p className="text-stone-400 text-sm">No job descriptions found. Create or upload one to get started.</p>
+            ) : (
+              jobs.map((job) => (
+                <div
+                  key={job.id}
+                  onClick={() => {
+                    setError(null);
+                    setSuccess(false);
+                    onSelectJob(job.id);
+                  }}
+                  className={`p-4 rounded-lg cursor-pointer transition border duration-150 ${
+                    selectedJobId === job.id
+                      ? 'bg-amber-50/50 border-amber-500 text-amber-900 shadow-sm font-semibold'
+                      : 'bg-stone-50 border-stone-200 hover:border-stone-300 text-stone-700'
+                  }`}
+                >
+                  <h3 className="text-base mb-1 truncate">{job.title}</h3>
+                  <p className="text-xs text-stone-500">
+                    Added: {new Date(job.created_at || job.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
