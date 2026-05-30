@@ -14,5 +14,6 @@ const upload = multer({
 router.post('/', rateLimiter, upload.single('file'), jobController.createJob);
 router.get('/', jobController.listJobs);
 router.get('/:id', jobController.getJob);
+router.delete('/:id', jobController.deleteJob);
 
 module.exports = router;
