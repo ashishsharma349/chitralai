@@ -81,7 +81,7 @@ function App() {
   const selectedJob = jobs.find((j) => j.id === selectedJobId);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-850 flex font-sans overflow-hidden h-screen">
+    <div className="min-h-screen bg-[#FAF8F5] text-stone-800 flex font-sans overflow-hidden h-screen">
       <aside className="w-80 bg-white border-r border-stone-200 flex flex-col justify-between h-full flex-shrink-0 z-30 shadow-sm">
         <div className="flex flex-col flex-1 overflow-hidden">
           <div className="p-6 border-b border-stone-150 bg-stone-50/50">
@@ -163,7 +163,7 @@ function App() {
         <div className="p-4 border-t border-stone-150 bg-stone-50/50 flex flex-col gap-2">
           <button
             onClick={handleProUpgrade}
-            className="w-full bg-stone-850 hover:bg-stone-900 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+            className="w-full bg-stone-900 hover:bg-stone-950 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -189,7 +189,7 @@ function App() {
           {selectedJobId !== null && (
             <button 
               onClick={() => setSelectedJobId(null)}
-              className="text-xs font-semibold text-stone-500 hover:text-stone-850 hover:bg-stone-50 border border-stone-200 px-3 py-2 rounded-xl transition-all"
+              className="text-xs font-semibold text-stone-500 hover:text-stone-800 hover:bg-stone-50 border border-stone-200 px-3 py-2 rounded-xl transition-all"
             >
               Back to Creation
             </button>

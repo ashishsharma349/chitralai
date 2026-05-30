@@ -186,7 +186,7 @@ function ResultsDashboard({ jobId, resultsCache = {}, onCacheUpdate }) {
               onClick={() => setSortOrder('desc')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 sortOrder === 'desc'
-                  ? 'bg-white text-stone-850 shadow-sm border border-stone-150'
+                  ? 'bg-white text-stone-900 shadow-sm border border-stone-200'
                   : 'text-stone-500 hover:text-stone-700'
               }`}
             >
@@ -196,7 +196,7 @@ function ResultsDashboard({ jobId, resultsCache = {}, onCacheUpdate }) {
               onClick={() => setSortOrder('asc')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 sortOrder === 'asc'
-                  ? 'bg-white text-stone-850 shadow-sm border border-stone-150'
+                  ? 'bg-white text-stone-900 shadow-sm border border-stone-200'
                   : 'text-stone-500 hover:text-stone-700'
               }`}
             >
