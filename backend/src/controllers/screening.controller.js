@@ -132,7 +132,8 @@ async function getScreeningResults(req, res, next) {
       resume: row.Resume ? {
         id: row.Resume.id,
         fileName: row.Resume.fileName,
-        fileType: row.Resume.fileType
+        fileType: row.Resume.fileType,
+        extractedText: row.Resume.extractedText
       } : null
     }));
 
