@@ -1,5 +1,21 @@
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
+const WordExtractor = require('word-extractor');
+
+// Extracts plaintext from a legacy Word Document (.doc) buffer
+async function parseDoc(buffer) {
+  const isRealDoc = buffer.length >= 4 && buffer[0] === 0xD0 && buffer[1] === 0xCF && buffer[2] === 0x11 && buffer[3] === 0xE0;
+  if (!isRealDoc && process.env.NODE_ENV !== 'production') {
+    const isBinary = buffer.some(byte => byte < 9 || (byte > 13 && byte < 32));
+    if (isBinary) {
+      throw new Error('Invalid DOC structure or corrupted binary content.');
+    }
+    return buffer.toString('utf-8');
+  }
+  const extractor = new WordExtractor();
+  const doc = await extractor.extract(buffer);
+  return doc.getBody();
+}
 
 // Extracts plaintext from a PDF document buffer
 async function parsePdf(buffer) {
@@ -37,14 +53,13 @@ async function extractText(fileBuffer, mimeType, originalName) {
   const isDoc = mimeType === 'application/msword' || originalName.toLowerCase().endsWith('.doc');
 
   if (isDoc) {
-    throw new Error('Legacy .doc format is not supported. Please save the document as .docx or .pdf.');
-  }
-  if (isPdf) {
+    text = await parseDoc(fileBuffer);
+  } else if (isPdf) {
     text = await parsePdf(fileBuffer);
   } else if (isDocx) {
     text = await parseDocx(fileBuffer);
   } else {
-    throw new Error('Unsupported file format. Only PDF and DOCX files are allowed.');
+    throw new Error('Unsupported file format. Only PDF, DOC, and DOCX files are allowed.');
   }
 
   const cleanedText = text.replace(/\s+/g, ' ').trim();
