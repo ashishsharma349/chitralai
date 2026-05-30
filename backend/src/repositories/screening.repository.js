@@ -2,6 +2,7 @@ const ScreeningResult = require('../models/screening.model');
 const Resume = require('../models/resume.model');
 const Candidate = require('../models/candidate.model');
 const { Op } = require('sequelize');
+const { sequelize } = require('../config/db');
 
 // Saves a candidate's screening results in the database
 async function createResult(data, transaction) {
@@ -25,8 +26,8 @@ async function findByJobId(jobId, options = {}) {
           required: true,
           where: search.trim() ? {
             [Op.or]: [
-              { name: { [Op.like]: `%${search}%` } },
-              { email: { [Op.like]: `%${search}%` } }
+              sequelize.where(sequelize.fn('LOWER', sequelize.col('Resume->Candidate.name')), 'LIKE', `%${search.toLowerCase()}%`),
+              sequelize.where(sequelize.fn('LOWER', sequelize.col('Resume->Candidate.email')), 'LIKE', `%${search.toLowerCase()}%`)
             ]
           } : undefined
         }
