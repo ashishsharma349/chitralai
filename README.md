@@ -27,7 +27,7 @@ Chitralai_Assignment/
     ├── index.html                     (SPA template entry page)
     └── src/
         ├── App.jsx                    (Coordinating sidebar, JD, and dashboard states)
-        ├── index.css                  (Tailwind core directives & global base styles)
+        ├── index.css                  (Global base styles, CSS variables & design tokens)
         └── components/
             ├── JobDescriptionPanel.jsx(Manual JD input and JD document upload zone)
             ├── ResumeUpload.jsx       (Multi-file drag-and-drop resume dropzone)
@@ -71,7 +71,7 @@ If the Gemini API key is missing or calls return a rate limit limit error, the b
 
 ## 3. Tech Stack & Dependencies
 
-* **Frontend**: React (Vite), Tailwind CSS (for structure and theme styling), HTML5.
+* **Frontend**: React (Vite), Vanilla CSS (custom design system with CSS variables), HTML5.
 * **Backend**: Node.js, Express, Multer (multipart form-data parsing).
 * **Database**: MySQL, Sequelize ORM.
 * **Libraries**:
@@ -82,21 +82,32 @@ If the Gemini API key is missing or calls return a rate limit limit error, the b
 
 ---
 
-## 4. Setup & Running Instructions
+## 4. Deployed Application
+
+| Service | URL |
+|---------|-----|
+| **Frontend** | https://chitralai-beige.vercel.app |
+| **Backend API** | https://chitralai-backend.vercel.app |
+| **Health Check** | https://chitralai-backend.vercel.app/api/health |
+
+---
+
+## 5. Setup & Running Instructions (Local Development)
 
 ### Backend Setup
 
 1. **Configure Environment Variables**:
-   Create a `.env` file inside the `backend/` directory with the following variables:
+   Create a `.env` file inside the `backend/` directory (refer to `.env.example`):
    ```env
    PORT=5000
    NODE_ENV=development
-   DB_HOST=127.0.0.1
+   DB_HOST=your_mysql_host
+   DB_PORT=3306
    DB_USER=your_mysql_username
-   DB_PASS=your_mysql_password
-   DB_NAME=talent_screen_db
+   DB_PASSWORD=your_mysql_password
+   DB_NAME=your_database_name
+   DB_SSL=false
    GEMINI_API_KEY=your_gemini_api_key
-   FRONTEND_URL=http://localhost:5173
    ```
 
 2. **Install Dependencies & Start**:
@@ -105,12 +116,15 @@ If the Gemini API key is missing or calls return a rate limit limit error, the b
    npm install
    npm run start
    ```
-   *(During development, you can use `npm run dev` to launch the nodemon server).*
+   *(During development, use `npm run dev` to launch the nodemon server with hot reload).*
 
 ### Frontend Setup
 
 1. **Configure API URL**:
-   Verify your API URL matches the backend port (default: `http://localhost:5000`).
+   Create a `.env` file inside the `frontend/` directory:
+   ```env
+   VITE_API_URL=http://localhost:5000
+   ```
 
 2. **Install & Start**:
    ```bash
@@ -118,12 +132,13 @@ If the Gemini API key is missing or calls return a rate limit limit error, the b
    npm install
    npm run dev
    ```
-   *(This launches the Vite server locally, usually at `http://localhost:5173`).*
+   *(This launches the Vite dev server at `http://localhost:5173`).*
 
 ---
 
-## 5. Key Assumptions & Constraints
+## 6. Key Assumptions & Constraints
 
 1. **No Authentication & Authorization**: Since no authentication (authN) or authorization (authZ) is implemented, data limits (5 Job Descriptions and 15 resumes per JD) apply globally across the entire database.
-2. **Local MySQL Connection**: The system assumes MySQL is running locally or a remote connection string is configured in the environment. Sequelize automatically initializes and verifies schema tables on startup.
+2. **MySQL-Compatible Database**: The system connects to any MySQL-compatible database (local MySQL, TiDB Serverless, PlanetScale, etc.) via environment variables. Sequelize automatically initializes and verifies schema tables on startup. SSL is configurable via `DB_SSL`.
 3. **Rate Limits**: The API is protected by a custom, sliding-window rate-limiting middleware restricting client requests to 5 hits per minute per IP, preventing simple denial-of-service attempts.
+4. **File Size Limit**: Uploaded documents are capped at 5 MB per file and 50,000 characters of extracted text to prevent abuse and ensure responsive AI processing.
