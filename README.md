@@ -124,6 +124,6 @@ If the Gemini API key is missing or calls return a rate limit limit error, the b
 
 ## 5. Key Assumptions & Constraints
 
-1. **Shared Database / Deployment**: The prototype assumes a single shared database instance for demonstrations. Multi-tenancy (user accounts) is bypassed, meaning limit bounds (5 Job Descriptions, 15 resumes per JD) apply globally across the database.
+1. **No Authentication & Authorization**: Since no authentication (authN) or authorization (authZ) is implemented, data limits (5 Job Descriptions and 15 resumes per JD) apply globally across the entire database.
 2. **Local MySQL Connection**: The system assumes MySQL is running locally or a remote connection string is configured in the environment. Sequelize automatically initializes and verifies schema tables on startup.
 3. **Rate Limits**: The API is protected by a custom, sliding-window rate-limiting middleware restricting client requests to 5 hits per minute per IP, preventing simple denial-of-service attempts.
