@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
 const { connectDB, sequelize } = require('./src/config/db');
 const jobRoutes = require('./src/routes/job.routes');
@@ -8,27 +7,25 @@ const screeningRoutes = require('./src/routes/screening.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const rawFrontendUrl = process.env.FRONTEND_URL;
-const frontendUrl = rawFrontendUrl ? rawFrontendUrl.replace(/\/$/, '') : null;
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true);
+// Manual CORS middleware — explicitly set headers on every response
+// Allows: our Vercel domains (production + preview) and localhost for dev
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    const isVercel = origin.endsWith('.vercel.app');
+    const isLocal = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+    if (isVercel || isLocal) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
-    const cleanedOrigin = origin.replace(/\/$/, '');
-    const isLocalhost = cleanedOrigin.startsWith('http://localhost:') || cleanedOrigin.startsWith('http://127.0.0.1:');
-    const isFrontendUrl = frontendUrl && cleanedOrigin === frontendUrl;
-    const isVercelDomain = cleanedOrigin.endsWith('.vercel.app');
-
-    if (isLocalhost || isFrontendUrl || isVercelDomain) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+  }
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(204).end();
+  }
+  next();
+});
 app.use(express.json());
 app.use('/api/jobs', jobRoutes);
 app.use('/api/screen', screeningRoutes);
