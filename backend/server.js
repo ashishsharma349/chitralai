@@ -11,13 +11,22 @@ const PORT = process.env.PORT || 5000;
 const rawFrontendUrl = process.env.FRONTEND_URL;
 const frontendUrl = rawFrontendUrl ? rawFrontendUrl.replace(/\/$/, '') : null;
 
-const allowedOrigins = [
-  frontendUrl,
-  'http://localhost:5173'
-].filter(Boolean);
-
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+    const cleanedOrigin = origin.replace(/\/$/, '');
+    const isLocalhost = cleanedOrigin.startsWith('http://localhost:') || cleanedOrigin.startsWith('http://127.0.0.1:');
+    const isFrontendUrl = frontendUrl && cleanedOrigin === frontendUrl;
+    const isVercelDomain = cleanedOrigin.endsWith('.vercel.app');
+
+    if (isLocalhost || isFrontendUrl || isVercelDomain) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
