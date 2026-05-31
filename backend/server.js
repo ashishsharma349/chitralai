@@ -8,8 +8,11 @@ const screeningRoutes = require('./src/routes/screening.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const rawFrontendUrl = process.env.FRONTEND_URL;
+const frontendUrl = rawFrontendUrl ? rawFrontendUrl.replace(/\/$/, '') : null;
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  frontendUrl,
   'http://localhost:5173'
 ].filter(Boolean);
 
