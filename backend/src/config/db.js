@@ -1,6 +1,13 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+// Force Vercel to bundle mysql2 package since Sequelize loads it dynamically
+try {
+  require('mysql2');
+} catch (e) {
+  // Ignore
+}
+
 const dbHost = process.env.DB_HOST;
 const dbPort = process.env.DB_PORT || 3306;
 const dbUser = process.env.DB_USER;
